@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<switchyard xmlns="urn:switchyard-config:switchyard:1.0" xmlns:bean="urn:switchyard-component-bean:config:1.0" xmlns:camel="urn:switchyard-component-camel:config:1.0" xmlns:sca="http://docs.oasis-open.org/ns/opencsa/sca/200912" name="switchyard-routingslip" targetNamespace="urn:com.jboss.sample.routingslip:switchyard-routingslip:0.0.1-SNAPSHOT">
+  <sca:composite name="switchyard-routingslip" targetNamespace="urn:com.jboss.sample.routingslip:switchyard-routingslip:0.0.1-SNAPSHOT">
+    <sca:component name="OrderServiceBean">
+      <bean:implementation.bean class="com.jboss.sample.routingslip.OrderServiceBean"/>
+      <sca:service name="OrderService">
+        <sca:interface.java interface="com.jboss.sample.routingslip.OrderService"/>
+      </sca:service>
+      <sca:reference name="ServiceRoute">
+        <sca:interface.java interface="com.jboss.sample.routingslip.ServiceRoute"/>
+      </sca:reference>
+    </sca:component>
+    <sca:component name="ServiceRouteBuilder">
+      <camel:implementation.camel>
+        <camel:java class="com.jboss.sample.routingslip.ServiceRouteBuilder"/>
+      </camel:implementation.camel>
+      <sca:service name="ServiceRoute">
+        <sca:interface.java interface="com.jboss.sample.routingslip.ServiceRoute"/>
+      </sca:service>
+      <sca:reference name="InventoryService">
+        <sca:interface.java interface="com.jboss.sample.routingslip.InventoryService"/>
+      </sca:reference>
+      <sca:reference name="SupplierService">
+        <sca:interface.java interface="com.jboss.sample.routingslip.SupplierService"/>
+      </sca:reference>
+      <sca:reference name="BackOfficeService">
+        <sca:interface.java interface="com.jboss.sample.routingslip.BackOfficeService"/>
+      </sca:reference>
+    </sca:component>
+    <sca:component name="InventoryServiceBean">
+      <bean:implementation.bean class="com.jboss.sample.routingslip.InventoryServiceBean"/>
+      <sca:service name="InventoryService">
+        <sca:interface.java interface="com.jboss.sample.routingslip.InventoryService"/>
+      </sca:service>
+    </sca:component>
+    <sca:service name="OrderService" promote="OrderServiceBean/OrderService">
+      <sca:interface.java interface="com.jboss.sample.routingslip.OrderService"/>
+    </sca:service>
+    <sca:component name="BackOfficeServiceBean">
+      <bean:implementation.bean class="com.jboss.sample.routingslip.BackOfficeServiceBean"/>
+      <sca:service name="BackOfficeService">
+        <sca:interface.java interface="com.jboss.sample.routingslip.BackOfficeService"/>
+      </sca:service>
+    </sca:component>
+    <sca:component name="SupplierServiceBean">
+      <bean:implementation.bean class="com.jboss.sample.routingslip.SupplierServiceBean"/>
+      <sca:service name="SupplierService">
+        <sca:interface.java interface="com.jboss.sample.routingslip.SupplierService"/>
+      </sca:service>
+    </sca:component>
+  </sca:composite>
+</switchyard>
