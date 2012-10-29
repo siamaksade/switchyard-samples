@@ -1,11 +1,15 @@
 package com.jboss.sample.routingslip;
 
+import static org.switchyard.component.camel.SwitchYardRouteDefinition.addNamespaceParameter;
+
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.language.HeaderExpression;
 import org.switchyard.component.camel.Route;
 
 @Route(ServiceRoute.class)
 public class ServiceRouteBuilder extends RouteBuilder {
+	private static final String NAMESPACE = "urn:com.jboss.sample.routingslip:switchyard-routingslip:0.0.1-SNAPSHOT";
+	
 	public void configure() {
 		from("switchyard://ServiceRoute")
 			.log("Received message for 'ServiceRoute' : ${body}")
@@ -15,22 +19,21 @@ public class ServiceRouteBuilder extends RouteBuilder {
 
 	public static class ComputeSlip {
 		public String compute(String body) {
-			String namespace = "urn:com.jboss.sample.routingslip:switchyard-routingslip:0.0.1-SNAPSHOT";
 
 			if ("1".equals(body)) {
-				return "switchyard://InventoryService?namespace=" + namespace + "," + 
-						"switchyard://BackOfficeService?namespace=" + namespace + "," + 
-						"switchyard://SupplierService?namespace=" + namespace + ",";
+				return addNamespaceParameter("switchyard://InventoryService", NAMESPACE) + "," + 
+						addNamespaceParameter("switchyard://BackOfficeService", NAMESPACE) + "," + 
+						addNamespaceParameter("switchyard://SupplierService", NAMESPACE);
 				
 			} else if ("2".equals(body)) {
-				return "switchyard://SupplierService?namespace=" + namespace + "," + 
-						"switchyard://BackOfficeService?namespace=" + namespace + "," + 
-						"switchyard://InventoryService?namespace=" + namespace + ",";
+				return addNamespaceParameter("switchyard://SupplierService", NAMESPACE) + "," + 
+						addNamespaceParameter("switchyard://BackOfficeService", NAMESPACE) + "," + 
+						addNamespaceParameter("switchyard://InventoryService", NAMESPACE);
 			}
 			
-			return "switchyard://BackOfficeService?namespace=" + namespace + "," + 
-					"switchyard://SupplierService?namespace=" + namespace + "," + 
-					"switchyard://InventoryService?namespace=" + namespace + ",";
+			return addNamespaceParameter("switchyard://BackOfficeService", NAMESPACE) + "," + 
+					addNamespaceParameter("switchyard://SupplierService", NAMESPACE) + "," + 
+					addNamespaceParameter("switchyard://InventoryService", NAMESPACE);
 		}
 	}
 }
