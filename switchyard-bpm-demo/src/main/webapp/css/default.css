@@ -1,0 +1,10 @@
+.status-unknown {
+}
+
+.status-valid {
+	color: green;
+}
+
+.status-invalid {
+	color: red;
+}

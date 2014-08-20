@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<switchyard xmlns="urn:switchyard-config:switchyard:1.0" xmlns:bean="urn:switchyard-component-bean:config:1.0" xmlns:bpm="urn:switchyard-component-bpm:config:1.0" xmlns:quartz="urn:switchyard-component-camel-quartz:config:1.0" xmlns:resteasy="urn:switchyard-component-resteasy:config:1.0" xmlns:sca="http://docs.oasis-open.org/ns/opencsa/sca/200912" xmlns:xform="urn:switchyard-config:transform:1.0">
+  <sca:composite name="osdemo" targetNamespace="urn:com.jboss.sample.bpm:demo-validation-service:1.0">
+    <sca:component name="ProcessOrder">
+      <bpm:implementation.bpm processId="ProcessOrder">
+        <bpm:manifest>
+          <bpm:resources>
+            <bpm:resource location="META-INF/ProcessOrder.bpmn" type="BPMN2"/>
+          </bpm:resources>
+        </bpm:manifest>
+        <bpm:operations>
+          <bpm:operation name="submitOrder" type="START_PROCESS">
+            <bpm:inputs>
+              <bpm:input from="message.content" to="Parameter"/>
+              <bpm:input from="context['org.switchyard.messageId']" to="messageId"/>
+              <bpm:input from="userName" to="userName"/>
+            </bpm:inputs>
+            <bpm:outputs>
+              <bpm:output from="Result" to="message.content"/>
+            </bpm:outputs>
+          </bpm:operation>
+          <bpm:operation eventId="Signal_1" name="updateStatus" type="SIGNAL_EVENT"/>
+        </bpm:operations>
+      </bpm:implementation.bpm>
+      <sca:service name="ProcessOrder">
+        <sca:interface.java interface="com.jboss.sample.bpm.service.ProcessOrder"/>
+      </sca:service>
+      <sca:reference name="Persistence">
+        <sca:interface.java interface="com.jboss.sample.bpm.service.Persistence"/>
+      </sca:reference>
+      <sca:reference name="Validation">
+        <sca:interface.java interface="com.jboss.sample.bpm.service.Validation"/>
+      </sca:reference>
+      <sca:reference name="SendNotification">
+        <sca:interface.java interface="com.jboss.sample.bpm.service.SendNotification"/>
+      </sca:reference>
+    </sca:component>
+    <sca:component name="Persistence">
+      <bean:implementation.bean class="com.jboss.sample.bpm.service.PersistenceBean"/>
+      <sca:service name="Persistence">
+        <sca:interface.java interface="com.jboss.sample.bpm.service.Persistence"/>
+      </sca:service>
+    </sca:component>
+    <sca:component name="ValidationBean">
+      <bean:implementation.bean class="com.jboss.sample.bpm.service.ValidationBean"/>
+      <sca:service name="Validation">
+        <sca:interface.java interface="com.jboss.sample.bpm.service.Validation"/>
+      </sca:service>
+      <sca:reference name="ValidationResource">
+        <sca:interface.java interface="com.jboss.sample.bpm.service.ValidationResource"/>
+      </sca:reference>
+    </sca:component>
+    <sca:reference name="ValidationResource" multiplicity="0..1" promote="ValidationBean/ValidationResource">
+      <sca:interface.java interface="com.jboss.sample.bpm.service.ValidationResource"/>
+      <resteasy:binding.rest name="ValidationReference">
+        <resteasy:interfaces>com.jboss.sample.bpm.service.ValidationResource</resteasy:interfaces>
+        <resteasy:address>http://localhost:8080/rest-binding/</resteasy:address>
+        <resteasy:timeout>5000</resteasy:timeout>
+      </resteasy:binding.rest>
+    </sca:reference>
+    <sca:service name="ProcessOrder" promote="ProcessOrder/ProcessOrder">
+      <sca:interface.java interface="com.jboss.sample.bpm.service.ProcessOrder"/>
+      <resteasy:binding.rest name="ProcessOrderService">
+        <resteasy:contextMapper class="com.jboss.sample.bpm.util.ProductIDCorrelationContextMapper"/>
+        <resteasy:interfaces>com.jboss.sample.bpm.service.ProcessOrderResource</resteasy:interfaces>
+        <resteasy:contextPath>rest-binding</resteasy:contextPath>
+      </resteasy:binding.rest>
+    </sca:service>
+    <sca:component name="SendNotificationBean">
+      <bean:implementation.bean class="com.jboss.sample.bpm.service.SendNotificationBean"/>
+      <sca:service name="SendNotification">
+        <sca:interface.java interface="com.jboss.sample.bpm.service.SendNotification"/>
+      </sca:service>
+    </sca:component>
+    <sca:component name="ValidationServiceBean">
+      <bean:implementation.bean class="com.jboss.sample.bpm.service.ValidationServiceBean"/>
+      <sca:service name="ValidationService">
+        <sca:interface.java interface="com.jboss.sample.bpm.service.ValidationService"/>
+      </sca:service>
+    </sca:component>
+    <sca:service name="ValidationService" promote="ValidationServiceBean/ValidationService">
+      <sca:interface.java interface="com.jboss.sample.bpm.service.ValidationService"/>
+      <resteasy:binding.rest name="ValidationService">
+        <resteasy:interfaces>com.jboss.sample.bpm.service.ValidationResource</resteasy:interfaces>
+        <resteasy:contextPath>rest-binding</resteasy:contextPath>
+      </resteasy:binding.rest>
+      <quartz:binding.quartz name="ValidationResponseSchedule">
+        <operationSelector operationName="sendOrderStatusResponse"/>
+        <quartz:name>ValidationResponseSchedule</quartz:name>
+        <quartz:cron>0/1 * * * * ?</quartz:cron>
+      </quartz:binding.quartz>
+    </sca:service>
+  </sca:composite>
+  <domain>
+    <properties>
+      <property name="userName" value="${user.name}"/>
+    </properties>
+  </domain>
+</switchyard>

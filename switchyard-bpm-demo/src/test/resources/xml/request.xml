@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<submitOrder xmlns="urn:com.jboss.sample.bpm:demo-validation-service:1.0">
+	<orderId>SHIPIT</orderId>
+	<itemId>cowbell</itemId>
+	<quantity>50</quantity>
+</submitOrder>

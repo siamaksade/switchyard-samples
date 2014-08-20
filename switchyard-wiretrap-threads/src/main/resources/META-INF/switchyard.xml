@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sy:switchyard xmlns:bean="urn:switchyard-component-bean:config:1.1" xmlns:camel="urn:switchyard-component-camel:config:1.1" xmlns:http="urn:switchyard-component-http:config:1.1" xmlns:netty="urn:switchyard-component-camel-netty:config:1.1" xmlns:sca="http://docs.oasis-open.org/ns/opencsa/sca/200912" xmlns:sy="urn:switchyard-config:switchyard:1.1" name="wiretrap-threading" targetNamespace="urn:com.example.switchyard:wiretrap-threading:1.0">
+  <sca:composite name="wiretrap-threading" targetNamespace="urn:com.example.switchyard:wiretrap-threading:1.0">
+    <sca:component name="CamelServiceRoute">
+      <camel:implementation.camel>
+        <camel:java class="com.example.switchyard.wiretrap.threading.CamelServiceRoute"/>
+      </camel:implementation.camel>
+      <sca:service name="MyService">
+        <sca:interface.java interface="com.example.switchyard.wiretrap.threading.MyService"/>
+      </sca:service>
+      <sca:reference name="CommonService">
+        <sca:interface.java interface="com.example.switchyard.wiretrap.threading.CommonService"/>
+      </sca:reference>
+    </sca:component>
+    <sca:component name="CommonServiceBean">
+      <bean:implementation.bean class="com.example.switchyard.wiretrap.threading.CommonServiceBean"/>
+      <sca:service name="CommonService">
+        <sca:interface.java interface="com.example.switchyard.wiretrap.threading.CommonService"/>
+      </sca:service>
+    </sca:component>
+    <sca:service name="MyService" promote="CamelServiceRoute/MyService">
+      <sca:interface.java interface="com.example.switchyard.wiretrap.threading.MyService"/>
+      <http:binding.http name="http1">
+        <http:contextPath>http/myservice</http:contextPath>
+      </http:binding.http>
+    </sca:service>
+  </sca:composite>
+</sy:switchyard>
